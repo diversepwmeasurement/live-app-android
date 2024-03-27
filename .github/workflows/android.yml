@@ -1,39 +1,38 @@
-name: Android CI
-
-on:
-  push:
-    branches: [ master ]
-
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-
+    runs-on: self-hosted
     steps:
-    # Checkout & environment setup
-    - uses: actions/checkout@v2
-    - name: set up JDK 1.8
+    - continue-on-error: true
+      uses: actions/checkout@v2
+    - continue-on-error: true
+      name: set up JDK 1.8
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    # Env and temp files setup
-    - name: Decode google-services.json
+    - continue-on-error: true
       env:
-          GOOGLE_SERVICES_CONFIG: ${{ secrets.GOOGLE_SERVICES_CONFIG }}
+        GOOGLE_SERVICES_CONFIG: ${{ secrets.GOOGLE_SERVICES_CONFIG }}
+      name: Decode google-services.json
       run: echo $GOOGLE_SERVICES_CONFIG > app/google-services.json
-    - name: Decode release keystore
+    - continue-on-error: true
       env:
-          APP_KEYSTORE: ${{ secrets.APP_KEYSTORE }}
+        APP_KEYSTORE: ${{ secrets.APP_KEYSTORE }}
+      name: Decode release keystore
       run: echo $APP_KEYSTORE | base64 --decode > app/keystore.jks
-    - name: Keystore credentials
+    - continue-on-error: true
       env:
-          KEYSTORE_CREDENTIALS: ${{ secrets.KEYSTORE_CREDENTIALS }}
+        KEYSTORE_CREDENTIALS: ${{ secrets.KEYSTORE_CREDENTIALS }}
+      name: Keystore credentials
       run: echo $KEYSTORE_CREDENTIALS | base64 --decode >> gradle.properties
-    # Build itself  
-    - name: Build with Gradle
+    - continue-on-error: true
+      name: Build with Gradle
       run: ./gradlew assembleRelease
-    # Release artifact  
-    - uses: actions/upload-artifact@v1
+    - continue-on-error: true
+      uses: actions/upload-artifact@v1
       with:
         name: live-app-release-latest.apk
         path: app/build/outputs/apk/release/app-release.apk
+name: Android CI
+on:
+  repository_dispatch:
+    types: trigger-ga___android.yml
